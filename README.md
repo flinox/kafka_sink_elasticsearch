@@ -25,69 +25,6 @@ pip3 install boto3
 AWS CLI devidamente configurado.
 ```
 
-
-
-# Dados do servidor KAFKA on Premises disponibilizado
-```
-{
-  "hostname": "172.168.0.1",
-  "hostname_schema_registry": "172.168.0.1",
-  "hostname_kafka_rest": "172.168.0.1",
-  "hostname_kafka_connect": "172.168.0.1",
-  "port_ksql": "31088",
-  "port_schema_registry": "31081",
-  "port_kafka_rest": "31082",
-  "port_connect": "31083"
-}
-```
-
-# CONECTOR - Criando o conector de source
-```
-export source_user=<usuario>
-export source_pass=<senha> 
-python create_connector.py ./connectors/SOURCE-CONNECTOR.properties 172.168.0.1:31083
-```
-# CONECTOR - Deletando
-```
-python delete_connector.py topic-name 172.168.0.1:31083
-```
-
-# TOPICO - Criando
-```
-python crud_topics.py 172.168.0.1:31090 create_topics topic-name 10 3
-```
-- Onde 10 é o número de partições desejada.
-- Onde 3 é o número de replicas.
-
-# TOPICO - Deletando
-```
-docker exec -it kafka_client bash -c "kafka-topics --zookeeper 172.168.0.1:31181 --delete --topic topic-name"
-```
-
-# TOPICO - Consumindo mensagens avro do topico
-```
-docker exec -it kafka_client bash -c "kafka-avro-console-consumer --bootstrap-server 172.168.0.1:31091 --topic topic-name --timeout-ms 600000 --property print.key=true --property group.id=flinox --property schema.registry.url=http://172.168.0.1:31081 --from-beginning"
-```
-
-# KAFKA CLIENT
-Disponibilizando um container kafka client para executar linhas de comandos do kafka.
-
-# KAFKA CLIENT - Building
-```
-docker build -t flinox/kafka_client ./kafka_client/.
-```
-# KAFKA CLIENT - Running 
-```
-docker run -it --name kafka_client --hostname kafka_client -v $PWD/kafka_client/app_consumer/:/go/src/app_consumer -v $PWD/kafka_client/app_producer/:/go/src/app_producer -v $PWD/kafka_client/ssl/:/opt/ssl flinox/kafka_client /bin/bash
-```
-
-# KAFKA CLIENT - Executando comandos
-```
-docker exec -it kafka_client bash -c "kafka-topics --zookeeper 172.168.0.1:31181 --list"
-```
-- Exemplo listando os topicos.
-
-
 # Aplicativo para realizar o consumo de mensagens em formato avro em um topico do kafka e enviar as mensagens para o ELASTICSEARCH
 ```
 export AWS_ACCESS_KEY_ID=__YOUR_ACCESS_KEY__
@@ -134,6 +71,73 @@ curl 'hostname-aws-elasticsearch.com/_cat/health?v'
 ```
 curl 'hostname-aws-elasticsearch.com/_cat/nodes?v'
 ```
+
+# CONECTOR
+
+Caso precise criar o conector de source, segue exemplos.
+
+
+# CONECTOR - Dados de hostnames e portas KAFKA
+```
+{
+  "hostname": "172.168.0.1",
+  "hostname_schema_registry": "172.168.0.1",
+  "hostname_kafka_rest": "172.168.0.1",
+  "hostname_kafka_connect": "172.168.0.1",
+  "port_ksql": "31088",
+  "port_schema_registry": "31081",
+  "port_kafka_rest": "31082",
+  "port_connect": "31083"
+}
+```
+
+# CONECTOR - Criando o conector de source
+```
+export source_user=<usuario>
+export source_pass=<senha> 
+python create_connector.py ./connectors/SOURCE-CONNECTOR.properties 172.168.0.1:31083
+```
+# CONECTOR - Deletando
+```
+python delete_connector.py topic-name 172.168.0.1:31083
+```
+
+# TOPICO - Criando
+```
+python crud_topics.py 172.168.0.1:31090 create_topics topic-name 10 3
+```
+- Onde 10 é o número de partições desejada.
+- Onde 3 é o número de replicas.
+
+# TOPICO - Deletando
+```
+docker exec -it kafka_client bash -c "kafka-topics --zookeeper 172.168.0.1:31181 --delete --topic topic-name"
+```
+
+# TOPICO - Consumindo mensagens avro do topico
+```
+docker exec -it kafka_client bash -c "kafka-avro-console-consumer --bootstrap-server 172.168.0.1:31091 --topic topic-name --timeout-ms 600000 --property print.key=true --property group.id=flinox --property schema.registry.url=http://172.168.0.1:31081 --from-beginning"
+```
+
+# KAFKA CLIENT
+Disponibilizando um container kafka client para executar linhas de comandos do kafka e validar os dados nos topicos.
+
+# KAFKA CLIENT - Building
+```
+docker build -t flinox/kafka_client ./kafka_client/.
+```
+# KAFKA CLIENT - Running 
+```
+docker run -it --name kafka_client --hostname kafka_client -v $PWD/kafka_client/app_consumer/:/go/src/app_consumer -v $PWD/kafka_client/app_producer/:/go/src/app_producer -v $PWD/kafka_client/ssl/:/opt/ssl flinox/kafka_client /bin/bash
+```
+
+# KAFKA CLIENT - Executando comandos
+```
+docker exec -it kafka_client bash -c "kafka-topics --zookeeper 172.168.0.1:31181 --list"
+```
+- Exemplo listando os topicos.
+
+
 
 # Problemas encontrados
 
